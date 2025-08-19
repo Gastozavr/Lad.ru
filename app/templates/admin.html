@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ЛАД</title>
+    <style>
+        /* Основные стили */
+        body {
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* Контейнер для шапки и навигации */
+        .header-nav-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        /* Шапка сайта */
+        .header-container {
+            width: 100%;
+            height: 150px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            filter: brightness(0.85);
+        }
+        
+        /* Верхняя часть шапки (для кнопки профиля) */
+        .header-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            z-index: 3;
+        }
+        
+        /* Нижняя часть шапки (для навигации) */
+        .header-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            z-index: 2;
+        }
+        
+        /* Кнопки навигации */
+        .nav-tabs {
+            display: flex;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            position: relative;
+            border: none;
+            border-radius: 6px;
+            margin: 3px;
+            background-color: rgba(241, 243, 245, 0.2);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .tab:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        
+        .tab.active {
+            background-color: #4cac2f;
+            color: white;
+            box-shadow: 0 4px 12px rgba(33, 121, 33, 0.3);
+            z-index: 3;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Кнопка профиля */
+        .profile-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            color: white;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .profile-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-button .avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: white;
+        }
+        
+        /* Основное содержимое */
+        .content {
+            padding: 15px;
+            background: white;
+            min-height: calc(100vh - 190px);
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        /* Посты */
+        .post {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .post:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .post-header {
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #f1f3f5;
+            background-color: #f8f9fa;
+        }
+        
+        .post-author {
+            font-weight: 700;
+            color: #343a40;
+            font-size: 14px;
+        }
+        
+        .post-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-bottom: 1px solid #f1f3f5;
+        }
+        
+        .post-text {
+            padding: 15px;
+            color: #495057;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .post-text h3 {
+            font-size: 16px;
+            margin-top: 0;
+        }
+        
+        .post-text p {
+            margin-bottom: 10px;
+        }
+        
+        .post-actions {
+            padding: 10px 15px;
+            border-top: 1px solid #f1f3f5;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .post-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #6c757d;
+            transition: all 0.2s ease;
+            padding: 5px;
+            border-radius: 6px;
+        }
+        
+        .post-actions button:hover {
+            color: #4cac2f;
+            background-color: #f1f3f5;
+        }
+        
+        /* Кнопка нового поста */
+        .new-post-button {
+            display: block;
+            margin: 15px auto;
+            padding: 10px 20px;
+            background-color: #a1a1a123;
+            color: rgb(32, 32, 32);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        .new-post-button:hover {
+            background-color: #3e8e26;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(33, 121, 33, 0.3);
+        }
+        
+        /* Стиль для кнопки "Нравится" */
+        .like {
+            background-color: #ececec;
+            color: #343a40;
+            padding: 5px 10px !important;
+        }
+        
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+        
+        .close {
+            color: #adb5bd;
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: absolute;
+            right: 15px;
+            top: 10px;
+        }
+        
+        .close:hover {
+            color: #495057;
+            transform: rotate(90deg);
+        }
+        
+        /* Содержимое модального окна профиля */
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #4cac2f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .profile-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #343a40;
+            text-align: center;
+        }
+        
+        .profile-email {
+            color: #6c757d;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .profile-actions button {
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .logout-button {
+            background-color: #f8d7da;
+            color: #dc3545;
+        }
+        
+        .logout-button:hover {
+            background-color: #f1c6cb;
+        }
+        
+        /* Модальное окно нового поста */
+        #newPostForm {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        #newPostForm textarea {
+            padding: 12px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        #newPostForm label {
+            font-weight: 600;
+            color: #343a40;
+            font-size: 14px;
+        }
+        
+        #newPostForm button[type="submit"] {
+            padding: 10px;
+            background-color: #4cac2f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            margin-top: 5px;
+        }
+        
+        /* Медиазапросы для адаптации */
+        @media (min-width: 768px) {
+            .header-container {
+                height: 200px;
+            }
+            
+            .header-top {
+                padding: 20px;
+            }
+            
+            .header-bottom {
+                padding: 20px;
+            }
+            
+            .tab {
+                padding: 12px 25px;
+                font-size: 16px;
+                margin: 0 5px;
+            }
+            
+            .profile-button {
+                padding: 10px 20px;
+                font-size: 16px;
+                gap: 8px;
+            }
+            
+            .profile-button .avatar {
+                width: 24px;
+                height: 24px;
+            }
+            
+            .content {
+                padding: 30px;
+                min-height: calc(100vh - 250px);
+            }
+            
+            .post {
+                max-width: 600px;
+                margin-left: auto;
+                margin-right: auto;
+                border-radius: 12px;
+                margin-bottom: 20px;
+            }
+            
+            .post-header {
+                padding: 15px 20px;
+            }
+            
+            .post-author {
+                font-size: 16px;
+            }
+            
+            .post-text {
+                padding: 20px;
+                font-size: 15px;
+            }
+            
+            .post-actions {
+                padding: 15px 20px;
+            }
+            
+            .new-post-button {
+                padding: 12px 25px;
+                font-size: 16px;
+                margin: 20px auto;
+            }
+            
+            .modal-content {
+                padding: 30px;
+                width: 380px;
+            }
+            
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 32px;
+            }
+            
+            .profile-name {
+                font-size: 22px;
+            }
+            
+            .profile-email {
+                font-size: 15px;
+            }
+            
+            .profile-actions button {
+                padding: 12px;
+                font-size: 15px;
+            }
+        }
+        @media (max-width: 480px) {
+            .header-container {
+                height: 120px;
+            }
+
+            .post-text {
+                font-size: 13px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Общий контейнер для навигации и шапки -->
+    <div class="header-nav-container">
+        <!-- Шапка сайта -->
+        <div class="header-container">
+            <img src="1.png" alt="Шапка сайта" class="header-image">
+            
+            <!-- Верхняя часть шапки (кнопка профиля) -->
+            <div class="header-top">
+                <button class="profile-button" onclick="openProfileModal()">
+                    <div class="avatar"></div>
+                    User123
+                </button>
+            </div>
+            
+            <!-- Нижняя часть шапки (навигация) -->
+            <div class="header-bottom">
+                <ul class="nav-tabs">
+                    <li class="tab active" onclick="showPage('main')">Основная</li>
+                    <li class="tab" onclick="showPage('about')">О нас</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Основное содержимое -->
+    <div class="content">
+        <div id="main-page" class="page active">            
+            <div class="post">
+                <div class="post-header">
+                    <div class="post-author">Пользователь 1</div>
+                </div>
+                <img src="" alt="Пост" class="post-image">
+                <div class="post-text">
+                    Это пример поста с изображением. Здесь может быть текст, который описывает изображение или просто мысли автора.
+                </div>
+                <div class="post-actions">
+                    <button class="like">❤️ Нравится</button>
+                </div>
+            </div>
+            <button class="new-post-button" onclick="openNewPostModal()">+ Новый пост</button>
+        </div>
+        
+        <div id="about-page" class="page">
+            <div class="post">
+                <div class="post-header">
+                    <div class="post-author">О ЛАД</div>
+                </div>
+                <div class="post-text">
+                    <h3>Добро пожаловать на наш сайт!</h3>
+                    <p>Летняя академия достижений – это профильная смена, имеющая научно-техническое направление. Участники смены органично сочетают отдых и образование. Организованный в первую половину дня учебный процесс и организованный отдых во вторую половину дня, позволяют организовать смену видов деятельности, и тем самым, вовлечь всех присутствующих в единую общину, организовать гармоничное общение, развитие интеллектуальных, творческих, коммуникативных умений и навыков. </p>
+                    <p>В городской загородной профильной смене  «Летняя Академия Достижений» (ЛАД) принимают участие учащиеся 7-10 специализированных классов города Новосибирска и педагоги, сопровождающие группу ребят своего образовательного учреждения.</p>
+                    <p>Организация работы в смене строится на объединении разновозрастного сообщества учащихся специализированных классов города Новосибирска с учетом личностных интересов участников смены.</p>
+                    <p>В образовательные организации, в которых открыты специализированные классы математического, естественно-научного и инженерно-технологического, а также IT - направлений  рассылаются приглашения для участия в данной профильной смене. Образовательная организация заполняет заявку на 10-12 человек и педагога сопровождающего группу ребят.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно профиля -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeProfileModal()">&times;</span>
+            
+            <div class="profile-info">
+                <div class="profile-avatar">U</div>
+                <div class="profile-name">User123</div>
+                <div class="profile-email">user123@example.com</div>
+                
+                <div class="profile-actions">
+                    <button class="logout-button">Выйти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно нового поста -->
+    <div id="newPostModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeNewPostModal()">&times;</span>
+            
+            <h2 style="margin-bottom: 15px; font-size: 18px;">Создать новый пост</h2>
+            
+            <form id="newPostForm">
+                <textarea placeholder="Что у вас нового?"></textarea>
+                
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                    <label for="postImage">Добавить изображение</label>
+                    <input type="file" id="postImage" accept="image/*">
+                </div>
+                
+                <button type="submit">Опубликовать</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Функции для переключения страниц
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            document.getElementById(pageId + '-page').classList.add('active');
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+
+        // Функции для модального окна профиля
+        function openProfileModal() {
+            document.getElementById('profileModal').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('profileModal').classList.add('show');
+            }, 10);
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.remove('show');
+            setTimeout(() => {
+                document.getElementById('profileModal').style.display = 'none';
+            }, 300);
+        }
+
+        // Функции для модального окна нового поста
+        function openNewPostModal() {
+            document.getElementById('newPostModal').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('newPostModal').classList.add('show');
+            }, 10);
+        }
+
+        function closeNewPostModal() {
+            document.getElementById('newPostModal').classList.remove('show');
+            setTimeout(() => {
+                document.getElementById('newPostModal').style.display = 'none';
+            }, 300);
+        }
+
+        // Обработчик клика вне модального окна
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                closeProfileModal();
+                closeNewPostModal();
+            }
+        }
+
+        // Обработчик формы нового поста
+        document.getElementById('newPostForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Пост успешно создан!');
+            closeNewPostModal();
+        });
+
+        // Обработчик кнопки "Нравится"
+        document.querySelector('.like').addEventListener('click', function() {
+            this.classList.toggle('liked');
+            if (this.classList.contains('liked')) {
+                this.innerHTML = '❤️ Нравится';
+                this.style.color = '#dc3545';
+                this.style.backgroundColor = '#f8d7da';
+            } else {
+                this.innerHTML = '❤️ Нравится';
+                this.style.color = '#343a40';
+                this.style.backgroundColor = '#ececec';
+            }
+        });
+    </script>
+</body>
+</html>
