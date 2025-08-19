@@ -1,0 +1,35 @@
+services:
+  web:
+    build: ./app
+    depends_on: 
+      - postgres
+    environment:
+      PG_USER: postgres
+      PG_PASSWORD: 'SKkgaej2414kgaert'
+      PG_DB: lad
+      PG_HOST: postgres
+      USERNAME: admin
+      PASSWORD: admin
+      JWT_SECRET: skofasjetiaewrowrwer
+    ports:
+      - 9001:9001
+    restart: unless-stopped  
+    networks:
+      - backend
+
+  postgres:
+    image: postgres:17.6-alpine3.22
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 'SKkgaej2414kgaert'
+      POSTGRES_DB: lad
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - backend
+
+
+networks:
+  backend:
+    driver: bridge

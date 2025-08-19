@@ -1,0 +1,4 @@
+flask
+flask-jwt-extended
+werkzeug
+psycopg2-binary
