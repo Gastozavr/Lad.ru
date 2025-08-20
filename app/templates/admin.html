@@ -518,7 +518,7 @@
     <div class="header-nav-container">
         <!-- Шапка сайта -->
         <div class="header-container">
-            <img src="1.png" alt="Шапка сайта" class="header-image">
+            <img src="/static/banner.jpg" alt="Шапка сайта" class="header-image">
             
             <!-- Верхняя часть шапки (кнопка профиля) -->
             <div class="header-top">
@@ -663,10 +663,47 @@
         }
 
         // Обработчик формы нового поста
-        document.getElementById('newPostForm').addEventListener('submit', function(e) {
+        document.getElementById('newPostForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            alert('Пост успешно создан!');
-            closeNewPostModal();
+            
+            const textArea = this.querySelector('textarea');
+            const imageInput = this.querySelector('#postImage');
+            
+            const text = textArea.value.trim();
+            
+            if (!text) {
+                alert('Введите текст поста');
+                return;
+            }
+            
+            // Создаём FormData для отправки файла
+            const formData = new FormData();
+            formData.append('text', text);
+            
+            if (imageInput.files[0]) {
+                formData.append('image', imageInput.files[0]);
+            }
+            
+            try {
+                const res = await fetch('/create_post', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    body: formData
+                });
+                
+                if (res.ok) {
+                    alert('Пост успешно создан!');
+                    closeNewPostModal();
+                    // Очищаем форму
+                    textArea.value = '';
+                    imageInput.value = '';
+                } else {
+                    const errorData = await res.json();
+                    alert('Ошибка: ' + (errorData.msg || 'Неизвестная ошибка'));
+                }
+            } catch (e) {
+                alert('Ошибка при создании поста');
+            }
         });
 
         // Обработчик кнопки "Нравится"
@@ -682,6 +719,17 @@
                 this.style.backgroundColor = '#ececec';
             }
         });
+
+        // Функция выхода
+        async function logout() {
+            try {
+                await fetch('/logout', { method: 'GET', credentials: 'same-origin' });
+            } catch (e) {}
+            window.location.reload();
+        }
+
+        // Обработчик кнопки "Выйти" в модальном окне профиля
+        document.querySelector('.logout-button').addEventListener('click', logout);
     </script>
 </body>
 </html>

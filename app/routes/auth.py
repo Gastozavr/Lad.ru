@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from services.hash import check_password, hash_password
 from models.db import get_hashed_pass, set_hashed_pass
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, set_access_cookies
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, set_access_cookies, unset_jwt_cookies
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -41,5 +41,11 @@ def register():
         return response
     else:
         return 'error', 401
+
+@auth_bp.route("/logout", methods=["GET"])
+def logout():
+    response = jsonify({"msg": "Logout successful"})
+    unset_jwt_cookies(response)
+    return response
 
 

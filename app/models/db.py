@@ -30,6 +30,7 @@ def init_db(pwd_hash):
         id serial PRIMARY KEY,
         author VARCHAR(255) NOT NULL,
         text TEXT NOT NULL,
+        image VARCHAR(255),
         likes INT
     );
     ''')
@@ -84,3 +85,43 @@ def set_hashed_pass(username, password):
     db_pool.putconn(conn)
 
     return created
+
+def save_post_in_db(username, text, image):
+
+    conn = db_pool.getconn()
+
+    cur = conn.cursor()
+    
+    try:
+        cur.execute('''
+        INSERT INTO posts (author, text, image, likes)
+        VALUES (%s, %s, %s, 0)
+        ''', (username, text, image))
+        
+        conn.commit()
+        created = cur.rowcount > 0
+        return created
+    except Exception as e:
+        print(f"Error creating post: {e}")
+        return False
+    finally:
+        cur.close()
+        db_pool.putconn(conn)
+
+def get_posts_from_db():
+
+    conn = db_pool.getconn()
+
+    cur = conn.cursor()
+
+    try:
+        cur.execute('SELECT * FROM posts')
+        data = cur.fetchall()
+
+        return data
+    except Exception as e:
+        print(f"Error creating post: {e}")
+        return False
+    finally:
+        cur.close()
+        db_pool.putconn(conn)

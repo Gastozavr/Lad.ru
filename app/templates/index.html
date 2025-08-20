@@ -439,7 +439,7 @@
     <div class="header-nav-container">
         <!-- Шапка сайта -->
         <div class="header-container">
-            <img src="1.png" alt="Шапка сайта" class="header-image">
+            <img src="/static/banner.jpg" alt="Шапка сайта" class="header-image">
             
             <!-- Верхняя часть шапки (кнопка авторизации) -->
             <div class="header-top">
@@ -459,18 +459,6 @@
     <!-- Основное содержимое -->
     <div class="content">
         <div id="main-page" class="page active">
-            <div class="post">
-                <div class="post-header">
-                    <div class="post-author">Пользователь 1</div>
-                </div>
-                <img src="" alt="Пост" class="post-image">
-                <div class="post-text">
-                    Это пример поста с изображением. Здесь может быть текст, который описывает изображение или просто мысли автора.
-                </div>
-                <div class="post-actions">
-                    <button class="like">❤️ Нравится</button>
-                </div>
-            </div>
         </div>
         
         <div id="about-page" class="page">
@@ -500,19 +488,18 @@
             </div>
             
             <div id="login-tab" class="tab-content active">
-                <form class="auth-form">
-                    <input type="text" placeholder="Логин или Email" required>
-                    <input type="password" placeholder="Пароль" required>
+                <form id="login-form" class="auth-form">
+                    <input id="login-username" type="text" placeholder="Логин" required>
+                    <input id="login-password" type="password" placeholder="Пароль" required>
                     <button type="submit">Войти</button>
                 </form>
             </div>
             
             <div id="register-tab" class="tab-content">
-                <form class="auth-form">
-                    <input type="text" placeholder="Имя пользователя" required>
-                    <input type="email" placeholder="Email" required>
-                    <input type="password" placeholder="Пароль" required>
-                    <input type="password" placeholder="Повторите пароль" required>
+                <form id="register-form" class="auth-form">
+                    <input id="register-username" type="text" placeholder="Имя пользователя" required>
+                    <input id="register-password" type="password" placeholder="Пароль" required>
+                    <input id="register-password-confirm" type="password" placeholder="Повторите пароль" required>
                     <button type="submit">Зарегистрироваться</button>
                 </form>
             </div>
@@ -565,18 +552,182 @@
             }
         }
 
-        document.querySelector('.like').addEventListener('click', function() {
-            this.classList.toggle('liked');
-            if (this.classList.contains('liked')) {
-                this.innerHTML = '❤️ Нравится';
-                this.style.color = '#dc3545';
-                this.style.backgroundColor = '#f8d7da';
-            } else {
-                this.innerHTML = '❤️ Нравится';
-                this.style.color = '#343a40';
-                this.style.backgroundColor = '#ececec';
+        // Обработчик кнопки "Нравится" - добавляем только если элемент найден
+        const likeButton = document.querySelector('.like');
+        if (likeButton) {
+            likeButton.addEventListener('click', function() {
+                this.classList.toggle('liked');
+                if (this.classList.contains('liked')) {
+                    this.innerHTML = '❤️ Нравится';
+                    this.style.color = '#dc3545';
+                    this.style.backgroundColor = '#f8d7da';
+                } else {
+                    this.innerHTML = '❤️ Нравится';
+                    this.style.color = '#343a40';
+                    this.style.backgroundColor = '#ececec';
+                }
+            });
+        }
+
+        // Переключение кнопки в шапке на "Выход" после успешного входа/регистрации
+        function setLogoutButtonMode() {
+            const btn = document.querySelector('.header-top .auth-button');
+            if (!btn) return;
+            btn.textContent = 'Выход';
+            btn.onclick = async () => {
+                try {
+                    await fetch('/logout', { method: 'GET', credentials: 'same-origin' });
+                } catch (e) {}
+                window.location.reload();
+            };
+        }
+
+        // Отправка JSON на /login и /register
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const usernameEl = document.getElementById('login-username');
+                const passwordEl = document.getElementById('login-password');
+                const username = usernameEl ? usernameEl.value.trim() : '';
+                const password = passwordEl ? passwordEl.value : '';
+
+                if (!username || !password) return;
+
+                const res = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (res.ok) {
+                    try {
+                        const adminRes = await fetch('/admin', { method: 'GET', credentials: 'same-origin' });
+                        if (adminRes.ok) {
+                            window.location.href = '/admin';
+                            return;
+                        }
+                    } catch (e) {}
+                    closeAuthModal();
+                    setLogoutButtonMode();
+                } else {
+                    alert('Ошибка входа');
+                }
+            });
+        }
+
+        const registerForm = document.getElementById('register-form');
+        if (registerForm) {
+            registerForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const usernameEl = document.getElementById('register-username');
+                const passwordEl = document.getElementById('register-password');
+                const confirmEl = document.getElementById('register-password-confirm');
+                const username = usernameEl ? usernameEl.value.trim() : '';
+                const password = passwordEl ? passwordEl.value : '';
+                const confirm = confirmEl ? confirmEl.value : '';
+
+                if (!username || !password) return;
+                if (password !== confirm) {
+                    alert('Пароли не совпадают');
+                    return;
+                }
+
+                const res = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (res.ok) {
+                    try {
+                        const adminRes = await fetch('/admin', { method: 'GET', credentials: 'same-origin' });
+                        if (adminRes.ok) {
+                            window.location.href = '/admin';
+                            return;
+                        }
+                    } catch (e) {}
+                    closeAuthModal();
+                    setLogoutButtonMode();
+                } else {
+                    alert('Ошибка регистрации');
+                }
+            });
+        }
+
+        // Проверка авторизации при загрузке страницы
+        async function checkAuthOnLoad() {
+            try {
+                const res = await fetch('/admin', { method: 'GET', credentials: 'same-origin' });
+                if (res.status === 403) {
+                    // Пользователь авторизован, но не админ - показываем кнопку "Выход"
+                    setLogoutButtonMode();
+                }
+            } catch (e) {}
+        }
+        document.addEventListener('DOMContentLoaded', checkAuthOnLoad);
+
+        // Загрузка постов с сервера
+        async function loadPosts() {
+            try {
+                const res = await fetch('/get_posts', { method: 'GET', credentials: 'same-origin' });
+                if (res.ok) {
+                    const data = await res.json();
+                    displayPosts(data.posts);
+                }
+            } catch (e) {
+                console.log('Ошибка загрузки постов:', e);
             }
-        });
+        }
+
+        // Отображение постов на странице
+        function displayPosts(posts) {
+            const mainPage = document.getElementById('main-page');
+            if (!mainPage) return;
+
+            // Очищаем существующие посты (кроме заголовка)
+            const existingPosts = mainPage.querySelectorAll('.post');
+            existingPosts.forEach(post => post.remove());
+
+            // Добавляем новые посты
+            posts.forEach(post => {
+                const postHtml = `
+                    <div class="post">
+                        <div class="post-header">
+                            <div class="post-author">${post.author}</div>
+                        </div>
+                        ${post.image ? `<img src="/static/${post.image}" alt="Пост" class="post-image">` : ''}
+                        <div class="post-text">${post.text}</div>
+                        <div class="post-actions">
+                            <button class="like">❤️ Нравится (${post.likes || 0})</button>
+                        </div>
+                    </div>
+                `;
+                mainPage.insertAdjacentHTML('beforeend', postHtml);
+            });
+
+            // Добавляем обработчики событий для кнопок "Нравится" в новых постах
+            const likeButtons = mainPage.querySelectorAll('.like');
+            likeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    this.classList.toggle('liked');
+                    if (this.classList.contains('liked')) {
+                        this.innerHTML = '❤️ Нравится';
+                        this.style.color = '#dc3545';
+                        this.style.backgroundColor = '#f8d7da';
+                    } else {
+                        this.innerHTML = '❤️ Нравится';
+                        this.style.color = '#343a40';
+                        this.style.backgroundColor = '#ececec';
+                    }
+                });
+            });
+        }
+
+        // Загружаем посты при загрузке страницы
+        document.addEventListener('DOMContentLoaded', loadPosts);
     </script>
 </body>
 </html>
